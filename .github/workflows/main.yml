@@ -1,0 +1,73 @@
+name: Validate configuration and push to S3
+on:
+  push:
+    branches: ['main']
+
+# Configuration
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  BUCKET_NAME: "aws-accelerator-config-014498641918-eu-west-2"
+  AWS_REGION: "eu-west-2"
+  AWS_ROLE: "arn:aws:iam::014498641918:role/github-lza-config-deployment"
+
+permissions:
+  id-token: write   # This is required for requesting the JWT
+  contents: read    # This is required for actions/checkout
+
+jobs:
+  BuildAndValidateConfig:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+    steps:
+
+      - name: Checkout config
+        uses: actions/checkout@v4
+        with:
+          path: config
+      - name: Checkout LZA Validator
+        uses: actions/checkout@v4
+        with:
+          repository: aws-samples/lza-validator
+          path: lza-validator
+      - name: Checkout LZA
+        uses: actions/checkout@v4
+        with:
+          repository: awslabs/landing-zone-accelerator-on-aws
+          path: landing-zone-accelerator-on-aws
+          fetch-tags: true
+      - name: Fetch AWS Credentials
+        id: aws-credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          role-to-assume: ${{ env.AWS_ROLE }}
+          role-session-name: GitHubPermissions
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Fetch LZA version
+        id: lza_version
+        run: |
+          cd landing-zone-accelerator-on-aws
+          tags=$(git tag)
+          echo "Tags: ${tags}"
+          n=1
+          latest_version=$(echo $tags | rev | cut -d ' ' -f 1-$n | rev)
+          echo "Latest version: ${latest_version}"
+          echo "version=${latest_version}" >> $GITHUB_OUTPUT
+          cd ..
+      - name: Build validator
+        run: cd lza-validator; bash build.sh; cd ../
+      - name: Validate config
+        run: |
+          LZA_VERSION="${{ steps.lza_version.outputs.version }}"
+          echo "Running config against LZA version: ${LZA_VERSION}, this will confirm validity."
+          docker run --rm --volume ${{ github.workspace }}/config:/lza/config -e AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID}" -e AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY}" -e AWS_SESSION_TOKEN="${AWS_SESSION_TOKEN}" lza-validator:${LZA_VERSION}
+      - name: Compress and upload to s3
+        run: |
+          cd config
+          zip -r aws-accelerator-config.zip ./
+          cd ../
+          aws s3 cp config/aws-accelerator-config.zip s3://${BUCKET_NAME}/zipped/aws-accelerator-config.zip
