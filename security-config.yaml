@@ -12,7 +12,7 @@ centralSecurityServices:
       - eu-central-1
       - eu-north-1
       - eu-west-1
-      - eu-west-2
+      - ca-central-1
       - eu-west-3
       - sa-east-1
       - us-east-1
@@ -94,7 +94,7 @@ centralSecurityServices:
       - eu-central-1
       - eu-north-1
       - eu-west-1
-      - eu-west-2
+      - ca-central-1
       - eu-west-3
       - sa-east-1
       - us-east-1
@@ -176,7 +176,7 @@ awsConfig:
           - eu-central-1
           - eu-north-1
           - eu-west-1
-          - eu-west-2
+          - ca-central-1
           - eu-west-3
           - sa-east-1
           - us-east-1

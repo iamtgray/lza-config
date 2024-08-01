@@ -13,24 +13,24 @@ globalReplacements:
   # Home Region
   - key: AcceleratorHomeRegion
     type: String
-    value: ca-central-1
+    value: eu-west-2
   # Security notification emails
   - key: SecurityHigh
     type: String
-    value: <notify-high>@example.com
+    value: tomgray+lza190@amazon.co.uk
   - key: SecurityMedium
     type: String
-    value: <notify-medium>@example.com
+    value: tomgray+lza190@amazon.co.uk
   - key: SecurityLow
     type: String
-    value: <notify-low>@example.com
+    value: tomgray+lza190@amazon.co.uk
   - key: SecurityIgnore
     type: String
-    value: <notify-ignore>@example.com
+    value: tomgray+lza190@amazon.co.uk
   # Budget notification emails
   - key: BudgetEmail
     type: String
-    value: <budget-alert>@example.com
+    value: tomgray+lza190@amazon.co.uk
   # Name of CloudWatch log group that centralizes CloudTrail logs. Referenced by CloudWatch metrics and alarms
   - key: CloudTrailLogGroup
     type: String

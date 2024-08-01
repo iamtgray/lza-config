@@ -20,17 +20,17 @@ workloadAccounts:
   # The "name" value DOES NOT need to match the account name
   - name: Network
     description: The shared network account is used for shared networking resources. Do not change the name field for this mandatory account. Note, the account name key does not need to match the AWS account name.
-    email: tomgray+tse190-network@amazon.co.uk
+    email: yourname-network@yourdomain.com
     organizationalUnit: Infrastructure
   - name: Operations
     description: This Account is used for centralized IT Operational resources (MAD, rsyslog, ITSM, etc.). Do not change the name field for this mandatory account. Note, the account name key does not need to match the AWS account name.
-    email: tomgray+tse190-ops@amazon.co.uk
+    email: yourname-operations@yourdomain.com
     organizationalUnit: Infrastructure
   - name: Perimeter
     description: Used for Internet facing, IaaS-based ingress/egress security services
-    email: tomgray+tse190-perim@amazon.co.uk
+    email: yourname-perimeter@yourdomain.com
     organizationalUnit: Infrastructure
   - name: WorkloadDev1
     description: Development workloads 1
-    email: tomgray+tse190-workload1@amazon.co.uk
+    email: yourname-workload1@yourdomain.com
     organizationalUnit: Dev

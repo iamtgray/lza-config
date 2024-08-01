@@ -1,4 +1,4 @@
-homeRegion: &HOME_REGION ca-central-1
+homeRegion: &HOME_REGION eu-west-2
 configVersion: 1.8.1-c
 enabledRegions:
   - *HOME_REGION
@@ -109,7 +109,7 @@ logging:
       - eu-central-1
       - eu-north-1
       - eu-west-1
-      - eu-west-2
+      - ca-central-1
       - eu-west-3
       - sa-east-1
       - us-east-1
@@ -151,7 +151,7 @@ logging:
           - eu-central-1
           - eu-north-1
           - eu-west-1
-          - eu-west-2
+          - ca-central-1
           - eu-west-3
           - sa-east-1
           - us-east-1
@@ -201,7 +201,7 @@ s3:
         - eu-central-1
         - eu-north-1
         - eu-west-1
-        - eu-west-2
+        - ca-central-1
         - eu-west-3
         - sa-east-1
         - us-east-1
@@ -233,7 +233,7 @@ lambda:
         - eu-central-1
         - eu-north-1
         - eu-west-1
-        - eu-west-2
+        - ca-central-1
         - eu-west-3
         - sa-east-1
         - us-east-1
