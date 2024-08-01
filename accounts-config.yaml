@@ -28,5 +28,9 @@ workloadAccounts:
     organizationalUnit: Infrastructure
   - name: Perimeter
     description: Used for Internet facing, IaaS-based ingress/egress security services
-    email: tomgray+tse190-peri@amazon.co.uk
+    email: tomgray+tse190-perim@amazon.co.uk
     organizationalUnit: Infrastructure
+  - name: WorkloadDev1
+    description: Development workloads 1
+    email: tomgray+tse190-workload1@amazon.co.uk
+    organizationalUnit: Dev
