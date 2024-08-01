@@ -1,26 +1,32 @@
 mandatoryAccounts:
+  # We recommend you do not change mandatory account names. These are used within Landing Zone Accelerator to reference the accounts from other config files.
+  # The "name" value does not currently support spaces
+  # The "name" value DOES NOT need to match the account name
   - name: Management
-    description: >-
-      The management (primary) account. Do not change the name field for this
-      mandatory account. Note, the account name key does not need to match the
-      AWS account name.
-    email: tomgray+lza190@amazon.co.uk
+    description: The management (primary) account. Do not change the name field for this mandatory account. Note, the account name key does not need to match the AWS account name.
+    email: tomgray+tse190@amazon.co.uk
     organizationalUnit: Root
-    warm: false
   - name: LogArchive
-    description: >-
-      The log archive account. Do not change the name field for this mandatory
-      account. Note, the account name key does not need to match the AWS account
-      name.
-    email: tomgray+lza190-security@amazon.co.uk
+    description: The log archive account. Do not change the name field for this mandatory account. Note, the account name key does not need to match the AWS account name.
+    email: tomgray+tse190-security@amazon.co.uk
     organizationalUnit: Security
-    warm: false
   - name: Audit
-    description: >-
-      The security audit account (also referred to as the audit account). Do not
-      change the name field for this mandatory account. Note, the account name
-      key does not need to match the AWS account name.
-    email: tomgray+lza190-audit@amazon.co.uk
+    description: The security tooling account (referred internally as the audit account). Do not change the name field for this mandatory account. Note, the account name key does not need to match the AWS account name.
+    email: tomgray+tse190-audit@amazon.co.uk
     organizationalUnit: Security
-    warm: false
-workloadAccounts: []
+workloadAccounts:
+  # The "name" will be used to set the AWS Account name
+  # The "name" value does not currently support spaces
+  # The "name" value DOES NOT need to match the account name
+  - name: Network
+    description: The shared network account is used for shared networking resources. Do not change the name field for this mandatory account. Note, the account name key does not need to match the AWS account name.
+    email: tomgray+tse190-network@amazon.co.uk
+    organizationalUnit: Infrastructure
+  - name: Operations
+    description: This Account is used for centralized IT Operational resources (MAD, rsyslog, ITSM, etc.). Do not change the name field for this mandatory account. Note, the account name key does not need to match the AWS account name.
+    email: tomgray+tse190-ops@amazon.co.uk
+    organizationalUnit: Infrastructure
+  - name: Perimeter
+    description: Used for Internet facing, IaaS-based ingress/egress security services
+    email: tomgray+tse190-peri@amazon.co.uk
+    organizationalUnit: Infrastructure

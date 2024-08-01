@@ -1,37 +1,493 @@
-homeRegion: eu-west-2
+homeRegion: &HOME_REGION ca-central-1
+configVersion: 1.8.1-c
 enabledRegions:
-  - eu-west-2
-managementAccountAccessRole: OrganizationAccountAccessRole
-cloudwatchLogRetentionInDays: 3653
+  - *HOME_REGION
+  # It is recommended to enable additional regions once the initial installation is complete in the home region.
+  # See the post-deployment documentation for more information.
+  # - "ap-northeast-1"
+  # - "ap-northeast-2"
+  # - "ap-northeast-3"
+  # - "ap-south-1"
+  # - "ap-southeast-1"
+  # - "ap-southeast-2"
+  # - "eu-central-1"
+  # - "eu-north-1"
+  # - "eu-west-1"
+  # - "eu-west-2"
+  # - "eu-west-3"
+  # - "sa-east-1"
+  # - "us-east-1"
+  # - "us-east-2"
+  # - "us-west-1"
+  # - "us-west-2"
+managementAccountAccessRole: OrganizationAccountAccessRole # UPDATE: If using Control Tower, set to AWSControlTowerExecution
+cloudwatchLogRetentionInDays: 731
+terminationProtection: true
 cdkOptions:
   centralizeBuckets: true
-  useManagementAccessRole: true
-terminationProtection: true
+  useManagementAccessRole: false
+  customDeploymentRole: AWSAccelerator-PipelineRole # UPDATE: If using a custom AcceleratorPrefix in the installer stack, this need to be updated accordingly
+  forceBootstrap: true
+snsTopics:
+  deploymentTargets:
+    accounts:
+      - Management
+      - Audit
+  topics:
+    - name: SecurityHigh
+      emailAddresses:
+        - "{{ SecurityHigh }}"
+    - name: SecurityMedium
+      emailAddresses:
+        - "{{ SecurityMedium }}"
+    - name: SecurityLow
+      emailAddresses:
+        - "{{ SecurityLow }}"
+    - name: SecurityIgnore
+      emailAddresses:
+        - "{{ SecurityIgnore }}"
 controlTower:
-  enable: false
-  controls: []
+  enable: false # UPDATE if using Control Tower, set to true
+  # UPDATE If using ControlTower, uncomment the following block and set the version to ControlTower latest available version
+  # landingZone:
+  #   version: '3.3'
+  #   logging:
+  #     loggingBucketRetentionDays: 365
+  #     accessLoggingBucketRetentionDays: 3650
+  #     organizationTrail: true
+  #   security:
+  #     enableIdentityCenterAccess: true
 logging:
   account: LogArchive
   cloudtrail:
-    enable: false
-    organizationTrail: false
+    enable: true
+    organizationTrail: true
     organizationTrailSettings:
       multiRegionTrail: true
       globalServiceEvents: true
-      managementEvents: true
+      managementEvents: true # UPDATE If using ControlTower, set to False. Control Tower already configures an organization trail for management events
       s3DataEvents: true
-      lambdaDataEvents: true
+      lambdaDataEvents: false
       sendToCloudWatchLogs: true
       apiErrorRateInsight: false
-      apiCallRateInsight: false
-    accountTrails: []
-    lifecycleRules: []
+      apiCallRateInsight: true
+    accountTrails:
+      - name: AccountTrail
+        regions:
+          - "{{ AcceleratorHomeRegion }}"
+        deploymentTargets:
+          accounts: []
+          organizationalUnits: []
+        settings:
+          multiRegionTrail: true
+          globalServiceEvents: true
+          managementEvents: true
+          s3DataEvents: true
+          lambdaDataEvents: true
+          sendToCloudWatchLogs: true
+          apiErrorRateInsight: false
+          apiCallRateInsight: false
   sessionManager:
-    sendToCloudWatchLogs: false
-    sendToS3: false
-    excludeRegions: []
-    excludeAccounts: []
-    lifecycleRules: []
-    attachPolicyToIamRoles: []
-tags: []
-iamRoleSsmParameters: []
+    sendToCloudWatchLogs: true
+    sendToS3: true
+    lifecycleRules:
+      - enabled: true
+        abortIncompleteMultipartUpload: 7
+        expiration: 730
+        noncurrentVersionExpiration: 730
+    attachPolicyToIamRoles:
+      - EC2-Default-SSM-AD-Role
+      - RDGW-Role
+      - Rsyslog-Role
+    excludeRegions:
+      - ap-northeast-1
+      - ap-northeast-2
+      - ap-northeast-3
+      - ap-south-1
+      - ap-southeast-1
+      - ap-southeast-2
+      - eu-central-1
+      - eu-north-1
+      - eu-west-1
+      - eu-west-2
+      - eu-west-3
+      - sa-east-1
+      - us-east-1
+      - us-east-2
+      - us-west-1
+      - us-west-2
+    excludeAccounts:
+      - Management
+      - LogArchive
+      - Audit
+  cloudwatchLogs:
+    dynamicPartitioning: dynamic-partitioning/log-filters.json
+    exclusions:
+      - accounts:
+          - Management
+        logGroupNames:
+          - aws-accelerator-cloudtrail-logs
+    encryption:
+      useCMK: true
+      deploymentTargets:
+        organizationalUnits:
+          - Security
+          - Infrastructure
+          - Central
+          - Dev
+          - Test
+          - Prod
+          - UnClass
+          - Sandbox
+        accounts:
+          - Management
+        excludedRegions:
+          - ap-northeast-1
+          - ap-northeast-2
+          - ap-northeast-3
+          - ap-south-1
+          - ap-southeast-1
+          - ap-southeast-2
+          - eu-central-1
+          - eu-north-1
+          - eu-west-1
+          - eu-west-2
+          - eu-west-3
+          - sa-east-1
+          - us-east-1
+          - us-east-2
+          - us-west-1
+          - us-west-2
+  accessLogBucket:
+    lifecycleRules:
+      - enabled: true
+        abortIncompleteMultipartUpload: 7
+        expiration: 730
+        noncurrentVersionExpiration: 730
+  centralLogBucket:
+    lifecycleRules:
+      - enabled: true
+        abortIncompleteMultipartUpload: 7
+        expiration: 730
+        noncurrentVersionExpiration: 730
+  elbLogBucket:
+    lifecycleRules:
+      - enabled: true
+        abortIncompleteMultipartUpload: 7
+        expiration: 730
+        noncurrentVersionExpiration: 730
+s3:
+  encryption:
+    createCMK: true
+    deploymentTargets:
+      organizationalUnits:
+        - Security
+        - Infrastructure
+        - Central
+        - Dev
+        - Test
+        - Prod
+        - UnClass
+        - Sandbox
+      accounts:
+        - Management
+      excludedRegions:
+        - ap-northeast-1
+        - ap-northeast-2
+        - ap-northeast-3
+        - ap-south-1
+        - ap-southeast-1
+        - ap-southeast-2
+        - eu-central-1
+        - eu-north-1
+        - eu-west-1
+        - eu-west-2
+        - eu-west-3
+        - sa-east-1
+        - us-east-1
+        - us-east-2
+        - us-west-1
+        - us-west-2
+lambda:
+  encryption:
+    useCMK: true
+    deploymentTargets:
+      organizationalUnits:
+        - Security
+        - Infrastructure
+        - Central
+        - Dev
+        - Test
+        - Prod
+        - UnClass
+        - Sandbox
+      accounts:
+        - Management
+      excludedRegions:
+        - ap-northeast-1
+        - ap-northeast-2
+        - ap-northeast-3
+        - ap-south-1
+        - ap-southeast-1
+        - ap-southeast-2
+        - eu-central-1
+        - eu-north-1
+        - eu-west-1
+        - eu-west-2
+        - eu-west-3
+        - sa-east-1
+        - us-east-1
+        - us-east-2
+        - us-west-1
+        - us-west-2
+ssmInventory:
+  enable: true
+  deploymentTargets:
+    organizationalUnits:
+      - Infrastructure
+      - Security
+      - Central
+      - Dev
+      - Test
+      - Prod
+      - UnClass
+      - Sandbox
+reports:
+  costAndUsageReport:
+    compression: Parquet
+    format: Parquet
+    reportName: Cost-and-Usage-Report
+    s3Prefix: cur
+    timeUnit: HOURLY
+    refreshClosedReports: true
+    reportVersioning: OVERWRITE_REPORT
+    additionalArtifacts:
+      - ATHENA
+    additionalSchemaElements:
+      - RESOURCES
+    lifecycleRules:
+      - enabled: true
+        abortIncompleteMultipartUpload: 7
+        expiration: 730
+        noncurrentVersionExpiration: 730
+  budgets:
+    - deploymentTargets:
+        accounts:
+          - Network
+      name: accel-budget
+      timeUnit: MONTHLY
+      type: COST
+      amount: 2000
+      includeUpfront: true
+      includeTax: true
+      includeSupport: true
+      includeSubscription: true
+      includeRecurring: true
+      includeOtherSubscription: true
+      includeDiscount: true
+      includeCredit: false
+      includeRefund: false
+      useBlended: false
+      useAmortized: false
+      unit: USD
+      notifications:
+        - type: ACTUAL
+          thresholdType: PERCENTAGE
+          threshold: 100
+          comparisonOperator: GREATER_THAN
+          subscriptionType: EMAIL
+          address: "{{ BudgetEmail }}"
+        - type: ACTUAL
+          thresholdType: PERCENTAGE
+          threshold: 90
+          comparisonOperator: GREATER_THAN
+          subscriptionType: EMAIL
+          address: "{{ BudgetEmail }}"
+        - type: ACTUAL
+          thresholdType: PERCENTAGE
+          threshold: 75
+          comparisonOperator: GREATER_THAN
+          subscriptionType: EMAIL
+          address: "{{ BudgetEmail }}"
+        - type: ACTUAL
+          thresholdType: PERCENTAGE
+          threshold: 50
+          comparisonOperator: GREATER_THAN
+          subscriptionType: EMAIL
+          address: "{{ BudgetEmail }}"
+    - deploymentTargets:
+        accounts:
+          - Perimeter
+      name: accel-budget
+      timeUnit: MONTHLY
+      type: COST
+      amount: 2000
+      includeUpfront: true
+      includeTax: true
+      includeSupport: true
+      includeSubscription: true
+      includeRecurring: true
+      includeOtherSubscription: true
+      includeDiscount: true
+      includeCredit: false
+      includeRefund: false
+      useBlended: false
+      useAmortized: false
+      unit: USD
+      notifications:
+        - type: ACTUAL
+          thresholdType: PERCENTAGE
+          threshold: 100
+          comparisonOperator: GREATER_THAN
+          subscriptionType: EMAIL
+          address: "{{ BudgetEmail }}"
+        - type: ACTUAL
+          thresholdType: PERCENTAGE
+          threshold: 90
+          comparisonOperator: GREATER_THAN
+          subscriptionType: EMAIL
+          address: "{{ BudgetEmail }}"
+        - type: ACTUAL
+          thresholdType: PERCENTAGE
+          threshold: 80
+          comparisonOperator: GREATER_THAN
+          subscriptionType: EMAIL
+          address: "{{ BudgetEmail }}"
+        - type: ACTUAL
+          thresholdType: PERCENTAGE
+          threshold: 75
+          comparisonOperator: GREATER_THAN
+          subscriptionType: EMAIL
+          address: "{{ BudgetEmail }}"
+        - type: ACTUAL
+          thresholdType: PERCENTAGE
+          threshold: 50
+          comparisonOperator: GREATER_THAN
+          subscriptionType: EMAIL
+          address: "{{ BudgetEmail }}"
+    - deploymentTargets:
+        accounts:
+          - Management
+      name: accel-budget
+      timeUnit: MONTHLY
+      type: COST
+      amount: 10000
+      includeUpfront: true
+      includeTax: true
+      includeSupport: true
+      includeSubscription: true
+      includeRecurring: true
+      includeOtherSubscription: true
+      includeDiscount: true
+      includeCredit: false
+      includeRefund: false
+      useBlended: false
+      useAmortized: false
+      unit: USD
+      notifications:
+        - type: ACTUAL
+          thresholdType: PERCENTAGE
+          threshold: 100
+          comparisonOperator: GREATER_THAN
+          subscriptionType: EMAIL
+          address: "{{ BudgetEmail }}"
+        - type: ACTUAL
+          thresholdType: PERCENTAGE
+          threshold: 90
+          comparisonOperator: GREATER_THAN
+          subscriptionType: EMAIL
+          address: "{{ BudgetEmail }}"
+        - type: ACTUAL
+          thresholdType: PERCENTAGE
+          threshold: 80
+          comparisonOperator: GREATER_THAN
+          subscriptionType: EMAIL
+          address: "{{ BudgetEmail }}"
+        - type: ACTUAL
+          thresholdType: PERCENTAGE
+          threshold: 75
+          comparisonOperator: GREATER_THAN
+          subscriptionType: EMAIL
+          address: "{{ BudgetEmail }}"
+        - type: ACTUAL
+          thresholdType: PERCENTAGE
+          threshold: 50
+          comparisonOperator: GREATER_THAN
+          subscriptionType: EMAIL
+          address: "{{ BudgetEmail }}"
+    - deploymentTargets:
+        organizationalUnits:
+          - Security
+          - Infrastructure
+          - Central
+          - Dev
+          - Test
+          - Prod
+          - UnClass
+          - Sandbox
+      name: default-accel-budget
+      timeUnit: MONTHLY
+      type: COST
+      amount: 1000
+      includeUpfront: true
+      includeTax: true
+      includeSupport: true
+      includeSubscription: true
+      includeRecurring: true
+      includeOtherSubscription: true
+      includeDiscount: true
+      includeCredit: false
+      includeRefund: false
+      useBlended: false
+      useAmortized: false
+      unit: USD
+      notifications:
+        - type: ACTUAL
+          thresholdType: PERCENTAGE
+          threshold: 100
+          comparisonOperator: GREATER_THAN
+          subscriptionType: EMAIL
+          address: "{{ BudgetEmail }}"
+        - type: ACTUAL
+          thresholdType: PERCENTAGE
+          threshold: 90
+          comparisonOperator: GREATER_THAN
+          subscriptionType: EMAIL
+          address: "{{ BudgetEmail }}"
+        - type: ACTUAL
+          thresholdType: PERCENTAGE
+          threshold: 80
+          comparisonOperator: GREATER_THAN
+          subscriptionType: EMAIL
+          address: "{{ BudgetEmail }}"
+        - type: ACTUAL
+          thresholdType: PERCENTAGE
+          threshold: 75
+          comparisonOperator: GREATER_THAN
+          subscriptionType: EMAIL
+          address: "{{ BudgetEmail }}"
+        - type: ACTUAL
+          thresholdType: PERCENTAGE
+          threshold: 50
+          comparisonOperator: GREATER_THAN
+          subscriptionType: EMAIL
+          address: "{{ BudgetEmail }}"
+limits:
+  - serviceCode: vpc
+    quotaCode: L-29B6F2EB
+    desiredValue: 90
+    deploymentTargets:
+      accounts:
+        - Network
+  - serviceCode: vpc
+    quotaCode: L-F678F1CE
+    desiredValue: 15
+    deploymentTargets:
+      accounts:
+        - Network
+  - serviceCode: ec2
+    quotaCode: L-0263D0A3
+    desiredValue: 5
+    deploymentTargets:
+      accounts:
+        - Perimeter
