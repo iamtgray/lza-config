@@ -4,15 +4,15 @@ mandatoryAccounts:
   # The "name" value DOES NOT need to match the account name
   - name: Management
     description: The management (primary) account. Do not change the name field for this mandatory account. Note, the account name key does not need to match the AWS account name.
-    email: tomgray+tse190@amazon.co.uk
+    email: tomgray+lza190@amazon.co.uk
     organizationalUnit: Root
   - name: LogArchive
     description: The log archive account. Do not change the name field for this mandatory account. Note, the account name key does not need to match the AWS account name.
-    email: tomgray+tse190-security@amazon.co.uk
+    email: tomgray+lza190-security@amazon.co.uk
     organizationalUnit: Security
   - name: Audit
     description: The security tooling account (referred internally as the audit account). Do not change the name field for this mandatory account. Note, the account name key does not need to match the AWS account name.
-    email: tomgray+tse190-audit@amazon.co.uk
+    email: tomgray+lza190-audit@amazon.co.uk
     organizationalUnit: Security
 workloadAccounts:
   # The "name" will be used to set the AWS Account name
@@ -20,17 +20,17 @@ workloadAccounts:
   # The "name" value DOES NOT need to match the account name
   - name: Network
     description: The shared network account is used for shared networking resources. Do not change the name field for this mandatory account. Note, the account name key does not need to match the AWS account name.
-    email: yourname-network@yourdomain.com
+    email: tomgray+lza190-net@amazon.co.uk
     organizationalUnit: Infrastructure
   - name: Operations
     description: This Account is used for centralized IT Operational resources (MAD, rsyslog, ITSM, etc.). Do not change the name field for this mandatory account. Note, the account name key does not need to match the AWS account name.
-    email: yourname-operations@yourdomain.com
+    email: tomgray+lza190-ops@amazon.co.uk
     organizationalUnit: Infrastructure
   - name: Perimeter
     description: Used for Internet facing, IaaS-based ingress/egress security services
-    email: yourname-perimeter@yourdomain.com
+    email: tomgray+lza190-per@amazon.co.uk
     organizationalUnit: Infrastructure
   - name: WorkloadDev1
     description: Development workloads 1
-    email: yourname-workload1@yourdomain.com
+    email: tomgray+lza190-dev@amazon.co.uk
     organizationalUnit: Dev
