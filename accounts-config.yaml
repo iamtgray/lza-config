@@ -15,7 +15,6 @@ mandatoryAccounts:
     email: tomgray+lza190-audit@amazon.co.uk
     organizationalUnit: Security
 workloadAccounts:
-  # The "name" will be used to set the AWS Account name
   # The "name" value does not currently support spaces
   # The "name" value DOES NOT need to match the account name
   - name: Network
